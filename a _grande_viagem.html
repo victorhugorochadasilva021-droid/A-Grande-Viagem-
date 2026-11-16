@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A Grande Viagem</title>
+<style>
+:root{--g:#1f3a2a;--br:#4a2f1a;--sand:#e9d8aa;--gold:#c9a24a;--p1:#b5532c;--p2:#2b7a8a}
+*{box-sizing:border-box;margin:0}
+body{font-family:Georgia,'Times New Roman',serif;background:#14231a;color:var(--sand);height:100vh;overflow:hidden}
+button{font-family:inherit;cursor:pointer}
+.screen{position:absolute;inset:0;display:none}.screen.on{display:flex}
+#title{flex-direction:column;align-items:center;justify-content:center;text-align:center;background:#0d1a12;overflow:hidden}
+#title svg.bg{position:absolute;inset:0;width:100%;height:100%}
+#title .c{position:relative;z-index:2;animation:rise 1.6s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(30px)}}
+h1{font-size:clamp(48px,8vw,110px);letter-spacing:.08em;color:#f6e6b4;text-shadow:0 4px 0 #6b4a1a,0 10px 40px #000}
+.sub{font-size:clamp(18px,2.4vw,30px);font-style:italic;margin:6px 0 34px;color:#fff3cf;text-shadow:0 2px 10px #000}
+.btn{display:block;margin:12px auto;min-width:260px;padding:14px 30px;font-size:20px;letter-spacing:.12em;border-radius:8px;border:2px solid var(--gold);color:#2b1a0a;background:linear-gradient(#f2dc9a,#c9a24a);box-shadow:0 5px 0 #6b4a1a,0 10px 25px #0008;transition:.15s;font-weight:bold}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.1)}.btn:active{transform:translateY(3px);box-shadow:0 2px 0 #6b4a1a}
+.btn.big{font-size:28px;padding:18px 40px}.btn.dark{background:linear-gradient(#3b5a43,#1f3a2a);color:var(--sand);min-width:0;font-size:15px;padding:9px 14px;margin:6px 0;width:100%;letter-spacing:.06em}
+.btn:disabled{opacity:.5;pointer-events:none}
+#sun{animation:glow 5s ease-in-out infinite alternate}@keyframes glow{to{opacity:.7;transform:scale(1.06)}}
+.cloud{animation:drift 60s linear infinite}@keyframes drift{from{transform:translateX(-300px)}to{transform:translateX(1700px)}}
+#game{flex-direction:column;background:radial-gradient(#26452f,#0f1d15)}
+header{display:flex;align-items:center;justify-content:space-between;padding:8px 20px;height:86px;background:linear-gradient(#3a2412,#26170b);border-bottom:3px solid var(--gold)}
+header h2{font-size:28px;letter-spacing:.12em;color:#f6e6b4}
+.pc{display:flex;align-items:center;gap:12px;padding:8px 18px;border-radius:10px;border:2px solid #0000;background:#0003;min-width:250px;transition:.3s;opacity:.65}
+.pc.act{opacity:1;border-color:var(--gold);box-shadow:0 0 22px var(--gold);background:#0006;transform:scale(1.05)}
+.dot{width:34px;height:34px;border-radius:50%;background:var(--c);border:3px solid #fff8;box-shadow:inset -4px -4px 8px #0006}
+.pc b{display:block;font-size:18px}.pc small{opacity:.8}.pc .sc{margin-left:auto;font-size:34px;color:#ffe08a;font-weight:bold}
+main{flex:1;display:flex;gap:16px;padding:12px 16px;min-height:0}
+#bw{flex:1;display:flex;align-items:center;justify-content:center;min-width:0}
+#board{position:relative;width:min(100%,calc((100vh - 130px)*1.6667));aspect-ratio:5/3;border:9px solid #3a2412;border-radius:12px;box-shadow:0 0 0 2px var(--gold),0 20px 60px #000;overflow:hidden;background:#1d4d5e}
+#map{position:absolute;inset:0;width:100%;height:100%}
+.an{transform-box:fill-box;transform-origin:50% 100%;animation:bob 3.5s ease-in-out infinite alternate}@keyframes bob{to{transform:translate(3px,-1px) scaleY(1.03)}}
+.rg{position:absolute;left:2%;font-size:clamp(14px,2.4vw,34px);letter-spacing:.3em;font-weight:bold;color:#2b1a0a40}
+#trail{position:absolute;inset:0;width:100%;height:100%}
+.cw{position:absolute;width:3.9%;aspect-ratio:1;transform:translate(-50%,-50%);filter:drop-shadow(0 4px 3px #0008)}
+.cell{width:100%;height:100%;background:radial-gradient(circle at 35% 30%,#fff6,#0000 60%),var(--c);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;border:0;text-shadow:0 1px 3px #000}
+.cell i{font-style:normal;font-size:clamp(10px,1.4vw,20px);font-weight:bold;line-height:1}.cell b{font-size:clamp(7px,.8vw,11px);opacity:.85}
+.cell[data-t=D]{border-radius:50%}.cell[data-t=C]{clip-path:polygon(25% 3%,75% 3%,100% 50%,75% 97%,25% 97%,0 50%)}
+.cell[data-t=S]{clip-path:polygon(50% 0,63% 35%,100% 38%,70% 60%,80% 98%,50% 76%,20% 98%,30% 60%,0 38%,37% 35%)}
+.cell[data-t=O]{clip-path:polygon(50% 0,100% 100%,0 100%)}.cell[data-t=O] i{margin-top:30%}.cell[data-t=O] b{display:none}
+.cell[data-t=A]{border-radius:22%;transform:rotate(45deg) scale(.78)}.cell[data-t=A]>*{transform:rotate(-45deg)}
+.cell[data-t=M]{clip-path:polygon(0 20%,60% 20%,60% 0,100% 50%,60% 100%,60% 80%,0 80%)}
+.cell[data-t=I],.cell[data-t=F]{border-radius:50%;border:4px solid #ffe08a}.cw.big{width:5.2%}
+.cell[data-t=I] i,.cell[data-t=F] i{font-size:clamp(9px,1.2vw,16px)}
+.lbl{position:absolute;transform:translate(-50%,0);font-size:clamp(8px,1vw,13px);font-weight:bold;color:#2b1a0a;background:#f2e2b0cc;padding:1px 7px;border-radius:4px;white-space:nowrap}
+.pawn{position:absolute;width:3.3%;aspect-ratio:.58;transform:translate(-50%,-86%);transition:left .26s ease-in-out,top .26s ease-in-out;z-index:5}
+.pawn svg{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 0 1.5px #fff) drop-shadow(0 4px 3px #000a)}
+.pawn.hop{animation:hop .26s}@keyframes hop{50%{margin-top:-14px}}
+aside{width:290px;display:flex;flex-direction:column;gap:8px;padding:14px;background:linear-gradient(#e9d8aa,#cfb87e);color:#2b1a0a;border:3px solid #4a2f1a;border-radius:12px;box-shadow:inset 0 0 30px #7a5a2a88,0 10px 30px #000a}
+aside h3{font-size:15px;letter-spacing:.1em;border-bottom:1px solid #4a2f1a66;padding-bottom:3px}
+#turn{font-size:22px;font-weight:bold}#stage{font-size:14px;font-style:italic}
+#die{width:84px;height:84px;margin:6px auto;background:linear-gradient(135deg,#fff,#ddd0b0);border-radius:16px;display:grid;grid-template:repeat(3,1fr)/repeat(3,1fr);padding:11px;box-shadow:0 6px 0 #9a8a60,0 10px 20px #0006}
+#die.roll{animation:spin .35s linear infinite}@keyframes spin{to{transform:rotate(360deg) scale(1.1)}}
+#die span.p{width:15px;height:15px;border-radius:50%;background:#2b1a0a;place-self:center;box-shadow:inset -2px -2px 3px #000a}
+#hist{font-size:13px;line-height:1.35;overflow:auto;flex:1;min-height:60px}#hist div{padding:3px 0;border-bottom:1px dotted #4a2f1a55}#hist div:first-child{font-weight:bold}
+#modal{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;z-index:50;backdrop-filter:blur(3px)}#modal.on{display:flex}
+.card{width:min(640px,92vw);max-height:92vh;overflow:auto;padding:0 0 22px;border-radius:14px;color:#2b1a0a;background:linear-gradient(#f0e2b6,#d9c38a);border:4px solid #4a2f1a;box-shadow:0 0 0 3px var(--gold),0 25px 70px #000;animation:pop .35s ease}@keyframes pop{from{transform:scale(.8) rotate(-2deg);opacity:0}}
+.card .hd{padding:12px 22px;color:#fff;font-size:20px;letter-spacing:.14em;background:var(--c);text-shadow:0 2px 4px #0008;display:flex;justify-content:space-between}
+.card .bd{padding:18px 26px 6px;font-size:20px;line-height:1.45}
+.opt{display:block;width:calc(100% - 52px);margin:10px 26px 0;padding:12px 16px;text-align:left;font-size:18px;background:#fff8e0;border:2px solid #4a2f1a;border-radius:8px;color:#2b1a0a;transition:.15s}
+.opt:hover:not(:disabled){background:#fff;transform:translateX(5px)}.opt.ok{background:#79b36a;border-color:#2c6a22;color:#fff}.opt.no{background:#c2574a;border-color:#7a1f16;color:#fff}.opt:disabled{cursor:default}
+.ex{margin:14px 26px 0;padding:12px;border-left:5px solid var(--c);background:#0001;font-size:17px;line-height:1.4}
+.card .btn{margin-top:16px;font-size:17px;min-width:200px}
+#win{background:radial-gradient(#3a5a2a,#0d1a12);flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:60;overflow:hidden}
+#win h1{font-size:clamp(40px,6vw,84px)}.cf{position:absolute;top:-20px;width:10px;height:16px;animation:fall linear forwards}@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+.cw{z-index:2}.pawn{z-index:6}.pawn.act{z-index:8}
+.pawn.act:after{content:"";position:absolute;left:-28%;right:-28%;bottom:-4%;height:20%;border-radius:50%;border:2px solid var(--gold);box-shadow:0 0 12px var(--gold);animation:ring 1.2s ease-in-out infinite alternate;z-index:-1}@keyframes ring{to{transform:scale(1.15);opacity:.6}}
+.bd{transform-box:fill-box;transform-origin:50% 100%;animation:idle 1.8s ease-in-out infinite alternate}@keyframes idle{to{transform:scaleY(1.03)}}
+.pawn.walk svg{animation:wk .26s ease-in-out infinite alternate;transform-origin:50% 100%}@keyframes wk{from{transform:rotate(-5deg)}to{transform:rotate(5deg)}}
+.fl{transform-box:fill-box;transform-origin:50% 100%;animation:fk .3s ease-in-out infinite alternate}@keyframes fk{to{transform:scale(.85,1.2)}}
+.sw{transform-box:fill-box;transform-origin:50% 100%;animation:sway 4s ease-in-out infinite alternate}@keyframes sway{from{transform:rotate(-2.5deg)}to{transform:rotate(2.5deg)}}
+.cell[data-t=S],.cell[data-t=A],.cell[data-t=M]{animation:glw 2.6s ease-in-out infinite alternate}@keyframes glw{to{filter:brightness(1.3)}}
+#die.roll{animation:tumble .5s linear infinite}@keyframes tumble{0%{transform:rotate(0)}50%{transform:rotate(180deg) scale(1.15) translateY(-8px)}100%{transform:rotate(360deg)}}
+#die.pop{animation:dpop .45s ease}@keyframes dpop{40%{transform:scale(1.25)}}
+.pb{height:5px;min-width:110px;background:#0006;border-radius:3px;margin-top:4px;overflow:hidden}.pb i{display:block;height:100%;width:0;background:linear-gradient(90deg,#c9a24a,#ffe08a);transition:width .5s}
+.ab{background:radial-gradient(#27492f,#12261a);color:#f1e3b4;border-color:#c9a24a;text-align:center;padding:26px 28px 22px}
+.ab small{letter-spacing:.3em;color:#c9a24a;font-size:13px}.ab h2{font-size:38px;letter-spacing:.14em;color:#f6e6b4;margin:6px 0;text-shadow:0 3px 0 #0006}.ab p{font-size:16px;font-style:italic;opacity:.9}
+.ab .sec{margin:22px 0 10px;color:#c9a24a;letter-spacing:.3em;font-size:14px;display:flex;align-items:center;gap:12px}.ab .sec:before,.ab .sec:after{content:"";flex:1;height:1px;background:linear-gradient(90deg,#0000,#c9a24a)}.ab .sec:after{transform:scaleX(-1)}
+.ab .dev{font-size:32px;font-weight:bold;color:#2b1a0a;padding:14px;border-radius:10px;border:2px solid #fff5;background:linear-gradient(135deg,#f6e6b4,#c9a24a);box-shadow:0 0 24px #c9a24a66}
+.ab .mem{display:grid;grid-template-columns:1fr 1fr;gap:10px}.ab .mem span{padding:11px;border-radius:8px;background:#0004;border:1px solid #c9a24a88;font-size:19px;color:#f6e6b4}
+.ab .note{margin-top:18px;font-size:14px;opacity:.75}
+@media (prefers-reduced-motion:reduce){.an,.sw,.bd,.cell,.fl{animation:none!important}}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute"><defs>
+<symbol id="el" viewBox="0 0 100 70"><g fill="currentColor"><ellipse cx="58" cy="30" rx="32" ry="20"/><circle cx="26" cy="28" r="15"/><path d="M15 34Q6 52 14 64L21 62Q17 50 23 40Z"/><rect x="38" y="40" width="11" height="28" rx="4"/><rect x="66" y="40" width="11" height="28" rx="4"/></g><ellipse cx="30" cy="27" rx="8" ry="11" fill="#000" opacity=".2"/><ellipse cx="58" cy="44" rx="30" ry="6" fill="#000" opacity=".14"/></symbol>
+<symbol id="mm" viewBox="0 0 100 70"><use href="#el" width="100" height="70"/><ellipse cx="46" cy="12" rx="17" ry="10" fill="currentColor"/><path d="M17 40Q6 46 10 60" stroke="#efe5c8" stroke-width="4" fill="none" stroke-linecap="round"/></symbol>
+<symbol id="gf" viewBox="0 0 100 70"><g fill="currentColor"><ellipse cx="42" cy="40" rx="24" ry="12"/><path d="M52 34L66 6L74 9L62 38Z"/><ellipse cx="73" cy="8" rx="9" ry="5"/><rect x="24" y="46" width="5" height="22"/><rect x="34" y="46" width="5" height="22"/><rect x="52" y="46" width="5" height="22"/><rect x="61" y="46" width="5" height="22"/></g><g fill="#5a3a10" opacity=".55"><circle cx="34" cy="38" r="4"/><circle cx="46" cy="42" r="4"/><circle cx="55" cy="35" r="3"/><circle cx="62" cy="22" r="3"/></g></symbol>
+<symbol id="cm" viewBox="0 0 100 70"><g fill="currentColor"><ellipse cx="45" cy="40" rx="26" ry="13"/><circle cx="36" cy="25" r="9"/><circle cx="54" cy="25" r="9"/><path d="M66 34L78 10L86 12L76 40Z"/><ellipse cx="87" cy="10" rx="9" ry="4.5"/><rect x="24" y="48" width="5" height="20"/><rect x="34" y="48" width="5" height="20"/><rect x="54" y="48" width="5" height="20"/><rect x="63" y="48" width="5" height="20"/></g></symbol>
+<symbol id="lm" viewBox="0 0 100 70"><g fill="currentColor"><ellipse cx="46" cy="42" rx="22" ry="12"/><path d="M60 36L68 8L76 10L70 40Z"/><ellipse cx="75" cy="8" rx="8" ry="4"/><rect x="28" y="50" width="5" height="18"/><rect x="37" y="50" width="5" height="18"/><rect x="54" y="50" width="5" height="18"/><rect x="62" y="50" width="5" height="18"/></g></symbol>
+<symbol id="kg" viewBox="0 0 100 70"><g fill="currentColor"><ellipse cx="46" cy="40" rx="15" ry="20" transform="rotate(-18 46 40)"/><circle cx="58" cy="16" r="8"/><path d="M52 12L51 2L56 9ZM60 9L63 1L65 10Z"/><path d="M36 52Q10 60 8 66L16 68Q30 62 44 58Z"/><ellipse cx="50" cy="62" rx="14" ry="5"/></g></symbol>
+<symbol id="bs" viewBox="0 0 100 70"><g fill="currentColor"><ellipse cx="58" cy="38" rx="30" ry="17"/><circle cx="38" cy="26" r="17"/><ellipse cx="20" cy="42" rx="12" ry="10"/><rect x="38" y="48" width="9" height="20"/><rect x="74" y="48" width="9" height="20"/></g><ellipse cx="20" cy="42" rx="11" ry="9" fill="#000" opacity=".3"/></symbol>
+<symbol id="ac" viewBox="0 0 100 70"><path d="M48 70V40Q46 34 38 30M50 44Q58 36 66 34" stroke="#4a3320" stroke-width="4" fill="none"/><ellipse cx="50" cy="26" rx="40" ry="12" fill="currentColor"/><ellipse cx="50" cy="31" rx="36" ry="6" fill="#000" opacity=".18"/></symbol>
+<symbol id="pn" viewBox="0 0 100 70"><path d="M50 4L72 34H60L80 58H20L40 34H28Z" fill="currentColor"/><rect x="46" y="58" width="8" height="10" fill="#4a3320"/></symbol>
+<symbol id="tr" viewBox="0 0 100 70"><rect x="46" y="40" width="8" height="28" fill="#4a3320"/><circle cx="50" cy="28" r="24" fill="currentColor"/><circle cx="58" cy="34" r="14" fill="#000" opacity=".16"/></symbol>
+<symbol id="mt" viewBox="0 0 100 70"><path d="M2 68L36 14L56 40L70 24L98 68Z" fill="#8a8678"/><path d="M36 14L56 40L98 68L50 68Z" fill="#000" opacity=".2"/><path d="M36 14L26 32L36 28L44 34L50 28Z" fill="#fff" opacity=".92"/></symbol>
+<symbol id="bb" viewBox="0 0 100 70"><path d="M40 68Q44 30 42 24H58Q56 30 60 68Z" fill="#7a5a3a"/><g fill="currentColor"><circle cx="30" cy="20" r="13"/><circle cx="52" cy="14" r="14"/><circle cx="72" cy="22" r="12"/></g></symbol>
+<symbol id="sb" viewBox="0 0 100 70"><g fill="currentColor"><circle cx="30" cy="48" r="18"/><circle cx="55" cy="42" r="22"/><circle cx="76" cy="50" r="16"/></g><ellipse cx="52" cy="60" rx="38" ry="8" fill="#000" opacity=".18"/></symbol>
+<symbol id="rk" viewBox="0 0 100 70"><path d="M5 66L18 30L45 22L62 40L58 66Z" fill="#8a867a"/><path d="M52 66L62 44L84 40L96 66Z" fill="#6f6b60"/></symbol>
+<symbol id="cv" viewBox="0 0 100 70"><path d="M5 68Q8 14 50 12Q92 14 95 68Z" fill="#6b5a45"/><path d="M28 68Q30 36 50 34Q70 36 72 68Z" fill="#1b130c"/></symbol>
+</defs></svg>
+
+<div id="title" class="screen on">
+<svg class="bg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice"><defs>
+<linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2b3f6b"/><stop offset=".45" stop-color="#d9784a"/><stop offset=".75" stop-color="#f5b95f"/></linearGradient>
+<radialGradient id="sn"><stop offset="0" stop-color="#fff6c8"/><stop offset=".4" stop-color="#ffd27a"/><stop offset="1" stop-color="#ffd27a00"/></radialGradient></defs>
+<rect width="1600" height="900" fill="url(#sk)"/>
+<g id="sun"><circle cx="800" cy="560" r="330" fill="url(#sn)"/></g>
+<g class="cloud" fill="#ffd9b088"><ellipse cx="200" cy="200" rx="160" ry="22"/><ellipse cx="320" cy="170" rx="110" ry="18"/></g>
+<polygon points="0,640 200,470 380,600 620,420 860,610 1100,450 1350,600 1600,480 1600,900 0,900" fill="#6d3f3a"/>
+<polygon points="0,700 250,580 520,690 800,600 1100,700 1400,600 1600,690 1600,900 0,900" fill="#3f2b2a"/>
+<path d="M0 760 Q400 720 800 760 T1600 750 V900 H0Z" fill="#1d2a17"/>
+<g fill="#0b120a"><rect x="1150" y="560" width="14" height="200"/><path d="M1000 570 Q1160 520 1330 570 Q1160 545 1000 570Z"/><path d="M1040 600 Q1160 560 1290 600 Q1160 580 1040 600Z"/>
+<rect x="260" y="610" width="10" height="150"/><path d="M150 620 Q270 580 400 620 Q270 600 150 620Z"/>
+<path d="M600 760 l30 -50 l10 20 l25 -40 l15 70Z"/></g><g color="#0b120a"><use href="#gf" x="330" y="560" width="240" height="168"/><use href="#el" x="1330" y="610" width="300" height="210"/></g></svg>
+<div class="c"><h1>A GRANDE VIAGEM</h1><div class="sub">A jornada da humanidade</div>
+<button class="btn big" onclick="startGame()">JOGAR</button>
+<button class="btn" onclick="howTo()">COMO JOGAR</button>
+<button class="btn" onclick="about()">SOBRE O PROJETO</button></div></div>
+
+<div id="game" class="screen">
+<header><div class="pc" id="pc0" style="--c:var(--p1)"><div class="dot"></div><div><b>Jogador 1</b><small id="ps0"></small><div class="pb"><i id="pb0"></i></div></div><div class="sc" id="sc0">0</div></div>
+<h2>A GRANDE VIAGEM</h2>
+<div class="pc" id="pc1" style="--c:var(--p2)"><div class="dot"></div><div><b>Jogador 2</b><small id="ps1"></small><div class="pb"><i id="pb1"></i></div></div><div class="sc" id="sc1">0</div></div></header>
+<main><div id="bw"><div id="board"></div></div>
+<aside><h3>VEZ DE</h3><div id="turn"></div><div id="stage"></div>
+<div id="die"></div><button class="btn" id="roll" onclick="roll()" style="min-width:0;margin:4px 0">LANÇAR DADO</button>
+<h3>ÚLTIMAS JOGADAS</h3><div id="hist"></div>
+<button class="btn dark" onclick="legend()">LEGENDA DAS CASAS</button>
+<button class="btn dark" id="snd" onclick="toggleSnd()">SOM: LIGADO</button>
+<button class="btn dark" onclick="if(confirm('Reiniciar a partida?'))startGame()">REINICIAR PARTIDA</button>
+<button class="btn dark" onclick="goTitle()">MENU INICIAL</button></aside></main></div>
+
+<div id="win" class="screen"><h1>VITÓRIA!</h1><div class="sub" id="wt"></div><div class="sub" id="wsc"></div>
+<button class="btn big" onclick="startGame()">JOGAR NOVAMENTE</button><button class="btn" onclick="goTitle()">MENU INICIAL</button></div>
+<div id="modal"></div>
+
+<script>
+const $=id=>document.getElementById(id),sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const N=30,END=29,PC=['#b5532c','#2b7a8a'];
+const T=['I',...'DCASMOCADMSCOADCMSOCADMCSOAD','F'];
+const NAME={D:'DESCOBERTA',C:'DESAFIO',S:'SORTE',O:'OBSTÁCULO',A:'ARTEFATO',M:'MIGRAÇÃO'};
+const COL={D:'#3f7fa6',C:'#8a3b8f',S:'#d4a72c',O:'#a8372b',A:'#8c6a3b',M:'#2f7d55',I:'#2f6a3a',F:'#b8902f'};
+const GL={D:'i',C:'?',S:'★',O:'!',A:'◆',M:'➜',I:'ÁFRICA',F:'MUNDO'};
+const STAGES=['África: origem do Homo sapiens (~300 mil anos)','Primeiros ancestrais humanos','Evolução humana','Desenvolvimento de ferramentas','Uso do fogo','Caça e coleta','Migrações humanas','Expansão para fora da África','Ocupação da Ásia','Ocupação da Europa (~45 mil anos)','Chegada à Oceania (~50 mil anos)','Chegada às Américas (> 15 mil anos)','Adaptação a diferentes ambientes','Desenvolvimento de comunidades','Destino: humanidade pelo planeta'];
+const FACTS=['Os dinossauros foram extintos há cerca de 66 milhões de anos. Os primeiros Homo sapiens surgiram só há aproximadamente 300 mil anos: nunca conviveram com dinossauros.','Fósseis de Jebel Irhoud, no Marrocos, têm cerca de 300 mil anos e estão entre os mais antigos de Homo sapiens conhecidos.','O Vale do Rift, na África Oriental, guarda muitos fósseis de ancestrais humanos, como os encontrados na Etiópia, Quênia e Tanzânia.','Homo sapiens significa "humano sábio". Somos a única espécie humana que ainda existe.','Os neandertais viveram na Europa e na Ásia Ocidental. Pessoas fora da África têm, em média, 1 a 2% de DNA neandertal.','Os humanos de hoje são todos da mesma espécie e têm uma origem comum na África.','Estudos de DNA mostram que a diversidade genética é maior na África, sinal de que nossa espécie é mais antiga lá.','Evidências de fogo controlado aparecem em sítios com mais de 400 mil anos. O fogo trouxe luz, calor e proteção.'];
+// [pergunta, [alternativas], índice correto, explicação]
+const Q=[
+['Em que continente surgiu o Homo sapiens?',['África','Ásia','Europa'],0,'Os fósseis mais antigos de Homo sapiens foram encontrados na África, há cerca de 300 mil anos.'],
+['Os primeiros humanos conviveram com dinossauros?',['Sim, no começo','Não, os dinossauros foram extintos antes','Só os pequenos'],1,'Os dinossauros desapareceram há cerca de 66 milhões de anos, muito antes dos humanos.'],
+['Há quanto tempo, aproximadamente, surgiu o Homo sapiens?',['300 mil anos','3 mil anos','66 milhões de anos'],0,'Nossa espécie tem cerca de 300 mil anos. Parece muito, mas é recente na história da Terra.'],
+['Lucy, famoso fóssil encontrado na Etiópia, era de qual espécie?',['Homo sapiens','Australopithecus afarensis','Neandertal'],1,'Lucy viveu há cerca de 3,2 milhões de anos e andava sobre duas pernas.'],
+['Qual vantagem trouxe andar sobre duas pernas?',['Correr mais que um leopardo','Deixar as mãos livres para carregar e usar objetos','Voar distâncias curtas'],1,'O bipedismo liberou as mãos, o que ajudou no uso de ferramentas.'],
+['De que material eram feitas as primeiras ferramentas?',['Ferro','Pedra lascada','Plástico'],1,'Os primeiros instrumentos eram pedras lascadas para cortar carne e raspar couro.'],
+['Para que serviu o domínio do fogo?',['Cozinhar, aquecer e afastar predadores','Apenas para brincar','Para fazer cerâmica moderna'],0,'O fogo permitiu cozinhar alimentos, se aquecer e se proteger à noite.'],
+['Como viviam os grupos de caçadores-coletores?',['Em grandes cidades','Em pequenos grupos que se deslocavam','Em castelos de pedra'],1,'Eles seguiam os alimentos e a água, vivendo em pequenos grupos nômades.'],
+['Qual espécie humana antiga foi uma das primeiras a sair da África?',['Homo erectus','Tiranossauro','Homo sapiens moderno'],0,'O Homo erectus saiu da África há mais de 1,8 milhão de anos e chegou à Ásia.'],
+['As saídas do Homo sapiens da África aconteceram...',['Em uma única viagem','Em diferentes períodos e ondas','Nunca aconteceram'],1,'Os grupos migraram em várias ondas ao longo de dezenas de milhares de anos.'],
+['Com quem o Homo sapiens se encontrou na Europa e na Ásia?',['Com neandertais','Com mamutes falantes','Com ninguém'],0,'Sapiens e neandertais se encontraram e deixaram descendentes em comum.'],
+['Há pelo menos quantos anos humanos chegaram à Austrália?',['Cerca de 50 mil anos','Cerca de 500 anos','Cerca de 2 mil anos'],0,'A ocupação da Austrália tem pelo menos 50 mil anos, exigindo travessias marítimas.'],
+['Por onde grupos humanos provavelmente chegaram às Américas?',['Pela região do Estreito de Bering','Pelo Canal do Panamá','Por um túnel no Atlântico'],0,'Na Era do Gelo, o nível do mar estava mais baixo e havia uma ligação de terra entre a Ásia e a América.'],
+['Qual sítio arqueológico brasileiro tem pinturas rupestres e vestígios muito antigos?',['Serra da Capivara (PI)','Cristo Redentor (RJ)','Pelourinho (BA)'],0,'A Serra da Capivara, no Piauí, é Patrimônio Mundial e guarda milhares de pinturas.'],
+['Luzia, fóssil encontrado em Lagoa Santa (MG), tem cerca de...',['11,5 mil anos','115 anos','1 milhão de anos'],0,'Luzia é um dos mais antigos esqueletos humanos já encontrados nas Américas.'],
+['O que são pinturas rupestres?',['Desenhos feitos em paredes de cavernas e rochas','Quadros modernos de museu','Mapas de computador'],0,'Eram feitas com pigmentos naturais e mostram animais, pessoas e símbolos.'],
+['Qual foi a principal mudança trazida pela agricultura, há cerca de 10 mil anos?',['Permitiu viver em um só lugar e formar vilas','Acabou com a necessidade de água','Fez o fogo desaparecer'],0,'Com plantio e criação de animais, as comunidades puderam se fixar.'],
+['O que significa o nome Homo sapiens?',['Humano sábio','Homem de pedra','Macaco gigante'],0,'É o nome científico da nossa espécie.'],
+['Os humanos descendem dos macacos que vivem hoje?',['Sim, diretamente','Não, temos ancestrais comuns com eles','Só dos gorilas'],1,'Humanos e macacos atuais compartilham ancestrais distantes, mas evoluíram por caminhos diferentes.'],
+['Como os humanos sobreviveram em regiões muito frias?',['Com roupas de pele, abrigos e fogo','Hibernando como ursos','Ficando só na África'],0,'A cultura e a tecnologia permitiram se adaptar a ambientes muito diferentes.'],
+['Todas as pessoas hoje pertencem a qual espécie?',['Homo sapiens','Homo erectus','Neandertal'],0,'Apesar das diferenças de aparência, somos uma única espécie.'],
+['Em que região da África ficam o Vale do Rift e a Garganta de Olduvai?',['África Oriental','Norte da Europa','Oceania'],0,'Essa região reúne muitos fósseis importantes sobre nossa origem.'],
+['Qual destas coisas ajudou os humanos a ocupar o planeta?',['Cooperação, linguagem e ferramentas','Asas','Casco duro'],0,'Aprender, ensinar e cooperar foi a grande força da nossa espécie.'],
+['O que um fóssil nos ajuda a descobrir?',['Como seres vivos do passado eram e viviam','A previsão do tempo de amanhã','O preço de alimentos'],0,'Fósseis são restos ou marcas de seres vivos preservados por muito tempo.']];
+
+let S,busy,qpool=[],audio,snd=true,cells=[];
+const POS=[[520,420],[485,395],[470,355],[500,325],[535,300],[505,268],[550,255],[520,205],[485,175],[505,135],[545,110],[610,135],[675,115],[745,120],[790,170],[770,235],[790,320],[775,420],[815,490],[865,445],[935,95],[85,115],[125,85],[190,110],[235,160],[200,205],[235,275],[290,330],[275,420],[258,515]];
+const P=i=>({x:POS[i][0]/10,y:POS[i][1]/6});
+const ST=[0,1,2,3,4,5,6,7,9,9,9,8,8,8,8,8,10,10,10,10,11,11,11,11,12,12,13,13,13,14];
+const fig=(c,d,h,hd,it)=>`<svg viewBox="0 0 40 70"><ellipse cx="20" cy="67" rx="13" ry="3" fill="#0007"/><g class="bd"><rect x="13.5" y="47" width="5.5" height="18" rx="2.5" fill="#7a4e32"/><rect x="21" y="47" width="5.5" height="18" rx="2.5" fill="#7a4e32"/><path d="M12.5 58h7v4h-7zM20.5 58h7v4h-7z" fill="#4a3220"/><rect x="3" y="26" width="5.5" height="17" rx="2.7" fill="#96603f"/><rect x="31.5" y="26" width="5.5" height="17" rx="2.7" fill="#96603f"/><rect x="3" y="38" width="5.5" height="4" fill="#4a3220"/><rect x="31.5" y="38" width="5.5" height="4" fill="#4a3220"/><path d="M9 24H31L35 54L32 59L29 54L26 59L23 54L20 59L17 54L14 59L11 54L8 59L5 54Z" fill="${c}" stroke="#2b1a0a" stroke-width="1.1"/><g fill="${d}" opacity=".7"><circle cx="14" cy="34" r="2"/><circle cx="26" cy="40" r="2.2"/><circle cx="18" cy="48" r="1.6"/></g><path d="M10 25L28 46" stroke="#4a3220" stroke-width="2.2"/><rect x="7" y="43" width="26" height="3.4" fill="#4a3220"/><rect x="18" y="42.4" width="4" height="4.6" fill="#d8b24a"/><path d="M14 23Q20 31 26 23" fill="none" stroke="#efe5c8" stroke-width="1.6" stroke-dasharray="2 1.5"/><circle cx="20" cy="14.5" r="8" fill="#a56d48"/><path d="${h}" fill="#1c120a"/><circle cx="17" cy="15" r="1" fill="#1c120a"/><circle cx="23" cy="15" r="1" fill="#1c120a"/>${hd}${it}</g></svg>`;
+function tone(f,d=.12,t='sine',v=.15){if(!snd)return;try{audio=audio||new AudioContext();const o=audio.createOscillator(),g=audio.createGain();o.type=t;o.frequency.value=f;g.gain.value=v;g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+d);o.connect(g);g.connect(audio.destination);o.start();o.stop(audio.currentTime+d)}catch(e){}}
+function toggleSnd(){snd=!snd;$('snd').textContent='SOM: '+(snd?'LIGADO':'DESLIGADO')}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));$(id).classList.add('on')}
+function goTitle(){show('title')}
+function modal(h){$('modal').innerHTML=h;$('modal').classList.add('on')}function closeM(){$('modal').classList.remove('on')}
+function howTo(){modal(`<div class="card" style="--c:#4a2f1a"><div class="hd">COMO JOGAR</div><div class="bd" style="font-size:17px">Dois jogadores se revezam no mesmo computador. Na sua vez, clique em <b>LANÇAR DADO</b>; sua peça anda as casas sorteadas e a casa em que parar traz um acontecimento ou uma pergunta com 3 alternativas.<br><br><b>+10 pontos</b> por resposta certa, <b>+5</b> por descobertas e sorte. Em um <b>Obstáculo</b>, errar faz perder a próxima jogada. Quem chegar primeiro ao <b>Mundo</b> (última casa) ganha 20 pontos e vence a partida.</div><div style="text-align:center"><button class="btn" onclick="closeM()">ENTENDI</button></div></div>`)}
+function about(){modal(`<div class="card ab"><small>PROJETO ESCOLAR</small><h2>A GRANDE VIAGEM</h2><p>Projeto desenvolvido para uma Feira de Conhecimento Escolar.</p><div class="sec">DESENVOLVEDOR</div><div class="dev">Victor Hugo Rocha</div><div class="sec">INTEGRANTES</div><div class="mem"><span>Gabriel Marques</span><span>Samuel Campos</span><span>Mateus Carolo</span><span>David Souza</span></div><p class="note">O jogo conta a origem do Homo sapiens na África (cerca de 300 mil anos) e a expansão da humanidade pelo mundo. Os animais do mapa representam a fauna característica de cada região durante a ocupação humana.</p><button class="btn" onclick="closeM()">FECHAR</button></div>`)}
+function legend(){modal(`<div class="card" style="--c:#4a2f1a"><div class="hd">LEGENDA</div><div class="bd" style="font-size:17px;line-height:1.9">`+Object.keys(NAME).map(k=>`<span style="display:inline-block;width:22px;height:22px;background:${COL[k]};border-radius:50%;vertical-align:middle;margin-right:8px"></span><b>${NAME[k]}</b> (${GL[k]}) — ${({D:'curiosidade histórica',C:'pergunta sobre evolução',S:'vantagem: +5 pontos e avança 2 casas',O:'responda ou perca a próxima jogada',A:'ferramenta ou fóssil + pergunta',M:'expansão pelos continentes + pergunta'})[k]}<br>`).join('')+`</div><div style="text-align:center"><button class="btn" onclick="closeM()">FECHAR</button></div></div>`)}
+
+function build(){
+ const U=(id,x,y,w,c,k='an')=>`<use href="#${id}" x="${x-w/2}" y="${y-w*.4}" width="${w}" height="${w*.7}" style="color:${c};animation-delay:${-((x*3+y)%5)}s" class="${k}"/>`,V=(i,x,y,w,c)=>U(i,x,y,w,c,'sw');
+ const C={af:'#a9a35a',eu:'#5f8f55',as:'#8f9a5a',na:'#6f9a58',sa:'#4f8a54',oc:'#c49a58'};
+ const ids=Object.keys(C),pts=POS.map(p=>p.join(',')),T1=pts.slice(0,20).join(' '),T2=pts.slice(21).join(' ');
+ const trail=(p,w,c,d)=>`<polyline points="${p}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" ${d?'stroke-dasharray="1 9"':''}/>`;
+ const lb=(x,y,t)=>`<text x="${x}" y="${y}" text-anchor="middle" font-size="18" letter-spacing="5" fill="#f4ecd0" stroke="#0b2a2a" stroke-width="3" paint-order="stroke" opacity=".8" font-family="Georgia">${t}</text>`;
+ let h=`<svg id="map" viewBox="0 0 1000 600"><defs>
+ <linearGradient id="oc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a6a7a"/><stop offset="1" stop-color="#143d52"/></linearGradient>
+ <linearGradient id="sh" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#000" stop-opacity=".25"/></linearGradient>
+ <radialGradient id="vg"><stop offset=".6" stop-color="#0000"/><stop offset="1" stop-color="#000a"/></radialGradient>
+ <path id="af" d="M425 268L470 244L515 242L545 246L575 254L590 265L602 287L640 314L648 324L612 337L595 365L585 405L560 455L525 500L498 495L488 450L460 410L430 385L418 345L412 300Z"/>
+ <path id="eu" d="M398 160L405 195L440 206L470 210L505 220L548 214L552 196L585 175L588 130L560 100L548 55L520 45L505 80L470 88L430 105L405 125Z"/>
+ <path id="as" d="M590 125L620 85L700 55L800 60L880 85L950 90L945 125L915 140L895 200L850 235L815 290L800 300L770 275L740 285L722 335L705 285L690 268L668 262L650 292L625 285L612 255L605 220L580 190L585 160Z"/>
+ <path id="na" d="M60 90L140 55L240 50L300 85L310 140L270 175L255 215L240 255L262 292L245 295L225 272L200 255L170 225L120 200L85 150Z"/>
+ <path id="sa" d="M250 295L300 290L345 325L335 375L305 440L280 520L255 560L240 520L230 440L215 370L225 320Z"/>
+ <path id="oc" d="M730 400L840 390L910 440L890 520L790 540L730 490Z"/></defs>
+ <rect width="1000" height="600" fill="url(#oc)"/>
+ <g fill="none" stroke="#fff" opacity=".05">${[100,200,300,400,500].map(y=>`<path d="M0 ${y}H1000"/>`).join('')}</g>
+ <g style="filter:drop-shadow(0 6px 5px #0007)">${ids.map(i=>`<use href="#${i}" fill="none" stroke="#9ed6cf" stroke-width="26" stroke-linejoin="round" opacity=".28"/>`).join('')}
+ ${ids.map(i=>`<use href="#${i}" fill="${C[i]}" stroke="${C[i]}" stroke-width="14" stroke-linejoin="round"/>`).join('')}<ellipse cx="640" cy="420" rx="9" ry="22" fill="#a9a35a"/><ellipse cx="418" cy="100" rx="9" ry="15" fill="#5f8f55"/><ellipse cx="925" cy="195" rx="8" ry="22" fill="#8f9a5a"/><path d="M320 30L365 28L355 70L335 62Z" fill="#6f9a58"/></g>
+ ${ids.map(i=>`<use href="#${i}" fill="url(#sh)"/>`).join('')}
+ <ellipse cx="505" cy="262" rx="60" ry="16" fill="#e0c98a" opacity=".55"/><ellipse cx="610" cy="255" rx="26" ry="12" fill="#e0c98a" opacity=".5"/><ellipse cx="815" cy="470" rx="45" ry="30" fill="#d9a15c" opacity=".55"/>
+ <ellipse cx="800" cy="320" rx="34" ry="11" fill="#6b8f4a"/><ellipse cx="860" cy="345" rx="16" ry="7" fill="#6b8f4a"/>
+ <path d="M725 140Q735 215 760 262M268 362Q300 368 338 352M578 332Q565 285 572 246" fill="none" stroke="#6cb7c9" stroke-width="3.5" stroke-linecap="round" opacity=".85"/>
+ ${U('gf',575,365,50,'#c8a24a')}${U('el',520,470,48,'#8a8478')}${U('cv',565,430,26,'#fff','')}${V('bb',448,300,30,'#7d8a44')}${V('ac',585,298,28,'#6c7a3a')}${V('sb',438,336,22,'#6f7a3a')}${U('rk',548,388,16,'#fff','')}
+ ${U('mm',438,138,44,'#5a4636')}${V('pn',455,190,26,'#2f5a3a')}${V('pn',578,150,26,'#2f5a3a')}${V('pn',500,95,24,'#2f5a3a')}${U('mt',545,172,30,'#fff','')}
+ ${U('el',700,190,46,'#7d776c')}${U('bs',640,180,34,'#4a3426')}${U('mt',640,225,40,'#fff','')}${U('mm',860,112,42,'#5a4636')}${V('tr',840,205,28,'#3d6b3a')}${V('tr',872,172,26,'#3d6b3a')}${V('pn',720,80,22,'#2f5a3a')}${V('pn',790,100,22,'#2f5a3a')}${U('rk',800,215,16,'#fff','')}
+ ${U('kg',765,496,34,'#b0733a')}${V('tr',850,505,26,'#6c7a3a')}${V('sb',825,428,20,'#a07a3a')}${U('rk',872,498,16,'#fff','')}
+ ${U('bs',140,185,40,'#4a3426')}${U('mt',165,150,38,'#fff','')}${V('pn',115,150,22,'#2f5a3a')}${V('pn',245,98,22,'#2f5a3a')}${V('sb',215,238,20,'#4f7a4a')}
+ ${U('lm',232,390,34,'#cdbb92')}${V('tr',315,376,26,'#2f6b3a')}${V('tr',250,347,26,'#2f6b3a')}${U('mt',252,456,28,'#fff','')}
+ ${lb(175,34,'AMÉRICA DO NORTE')}${lb(135,480,'AMÉRICA DO SUL')}${lb(385,62,'EUROPA')}${lb(760,40,'ÁSIA')}${lb(450,548,'ÁFRICA')}${lb(810,572,'OCEANIA')}
+ ${trail(T1,12,'#f6e9bc')}${trail(T2,12,'#f6e9bc')}<path d="M865 445Q995 330 935 95L1000 85" fill="none" stroke="#f6e9bc" stroke-width="12" stroke-linecap="round"/>${trail('0,100 85,115',8,'#f6e9bc')}
+ ${trail(T1,3,'#5a3a1a',1)}${trail(T2,3,'#5a3a1a',1)}<path d="M865 445Q995 330 935 95L1000 85" fill="none" stroke="#5a3a1a" stroke-width="3" stroke-dasharray="1 9" stroke-linecap="round"/>
+ <text x="958" y="70" text-anchor="middle" font-size="9" fill="#f6e9bc" font-family="Georgia">BERING</text>
+ <rect width="1000" height="600" fill="url(#vg)"/></svg>`;
+ POS.forEach((_,i)=>{const p=P(i),t=T[i];h+=`<div class="cw ${i%END==0?'big':''}" style="left:${p.x}%;top:${p.y}%"><div class="cell" data-t="${t}" style="--c:${COL[t]}"><i>${GL[t]}</i><b>${i%END?i+1:''}</b></div></div>`});
+ h+=`<div class="lbl" style="left:${P(0).x}%;top:${P(0).y+5}%">PARTIDA</div><div class="lbl" style="left:${P(END).x}%;top:${P(END).y+5}%">DESTINO FINAL</div>`;
+ h+=`<div class="pawn" id="pw0">${fig('#b5532c','#6e2e15','M11 14Q11 4 20 4Q29 4 29 14L31 30L27 18Q20 10 13 18L9 30Z','<path d="M12 11Q20 7 28 11" stroke="#c0392b" stroke-width="2.4" fill="none"/><path d="M27 10l5-7-1 8z" fill="#e8dcc0"/>','<line x1="37" y1="2" x2="37" y2="66" stroke="#5a3a1a" stroke-width="2"/><path d="M37 -2l-3.5 10h7z" fill="#d8d2b8"/><path d="M35 14l2 6 2-6" fill="#c0392b"/><rect x="23" y="45" width="7" height="8" rx="2" fill="#6b4a2a"/>')}</div><div class="pawn" id="pw1">${fig('#2b7a8a','#164048','M12 13Q13 5 20 5Q27 5 28 13Q20 8 12 13Z','<path d="M13 17Q20 28 27 17Q20 21 13 17Z" fill="#1c120a"/><path d="M26 7l5-3" stroke="#efe5c8" stroke-width="2" stroke-linecap="round"/>','<line x1="3" y1="30" x2="2" y2="58" stroke="#5a3a1a" stroke-width="2.5"/><path class="fl" d="M2.5 31Q-3 22 2.5 14Q8 22 2.5 31Z" fill="#ffb030"/><path d="M2.5 29Q0 24 2.5 20Q5 24 2.5 29Z" fill="#fff2a0"/><line x1="27" y1="44" x2="31" y2="56" stroke="#5a3a1a" stroke-width="2"/><path d="M27 44l-4 1 2 4 4-1z" fill="#8a867a"/>')}</div>`;
+ $('board').innerHTML=h}
+function place(p){const q=P(S.pos[p]),o=S.pos[0]==S.pos[1]?(p?1.2:-1.2):0;const e=$('pw'+p);e.style.left=(q.x+o)+'%';e.style.top=(q.y+1.6)+'%'}
+function ui(){for(let i=0;i<2;i++){$('sc'+i).textContent=S.score[i];$('ps'+i).textContent='Casa '+(S.pos[i]+1)+' de '+N;$('pb'+i).style.width=S.pos[i]/END*100+'%';$('pw'+i).classList.toggle('act',S.turn==i);$('pc'+i).classList.toggle('act',S.turn==i)}
+ $('turn').textContent='Jogador '+(S.turn+1);$('turn').style.color=PC[S.turn];$('stage').textContent='Fase: '+STAGES[ST[S.pos[S.turn]]]}
+function log(m){S.hist.unshift(m);$('hist').innerHTML=S.hist.slice(0,7).map(x=>`<div>${x}</div>`).join('')}
+function face(n){$('die').innerHTML=[[4],[0,8],[0,4,8],[0,2,6,8],[0,2,4,6,8],[0,2,3,5,6,8]][n-1].reduce((a,c)=>(a[c]='<span class="p" style="grid-area:'+(Math.floor(c/3)+1)+'/'+(c%3+1)+'"></span>',a),[]).join('')}
+function startGame(){closeM();S={pos:[0,0],score:[0,0],skip:[false,false],turn:0,hist:[]};busy=false;qpool=[];build();place(0);place(1);face(1);$('hist').innerHTML='';$('roll').disabled=false;ui();log('A partida começou na África!');show('game')}
+
+async function roll(){
+ if(busy)return;busy=true;$('roll').disabled=true;const p=S.turn;
+ if(S.skip[p]){S.skip[p]=false;log(`Jogador ${p+1} perdeu a vez (obstáculo).`);return next()}
+ $('die').classList.add('roll');let v;const iv=setInterval(()=>{face(1+Math.floor(Math.random()*6));tone(300+Math.random()*200,.05,'square',.04)},90);
+ await sleep(1000);clearInterval(iv);$('die').classList.remove('roll');v=1+Math.floor(Math.random()*6);face(v);tone(660,.2);$('die').classList.add('pop');setTimeout(()=>$('die').classList.remove('pop'),500);
+ log(`Jogador ${p+1} tirou ${v}.`);await sleep(400);
+ if(await move(p,v))return;await land(p)}
+async function move(p,n){const pe=$('pw'+p);pe.classList.add('walk');for(let k=0;k<n&&S.pos[p]<END;k++){S.pos[p]++;place(p);const e=$('pw'+p);e.classList.remove('hop');void e.offsetWidth;e.classList.add('hop');tone(440+k*40,.1,'triangle');ui();await sleep(300)}
+ pe.classList.remove('walk');if(S.pos[p]>=END){win(p);return true}return false}
+function next(){S.turn=1-S.turn;busy=false;$('roll').disabled=false;ui()}
+function nq(){if(!qpool.length)qpool=Q.map((_,i)=>i).sort(()=>Math.random()-.5);return Q[qpool.pop()]}
+function card(t,body,extra=''){return new Promise(r=>{modal(`<div class="card" style="--c:${COL[t]}"><div class="hd"><span>${NAME[t]}</span><span>Jogador ${S.turn+1}</span></div><div class="bd">${body}</div>${extra}<div id="fb"></div></div>`);window._r=r})}
+function cont(){closeM();window._r()}
+async function land(p){
+ const t=T[S.pos[p]],st=STAGES[ST[S.pos[p]]];
+ if(t=='D'){S.score[p]+=5;ui();tone(520,.3);const f=FACTS[Math.floor(Math.random()*FACTS.length)];log(`J${p+1} fez uma descoberta (+5).`);
+  await card(t,`<i style="font-size:16px">${st}</i><br><br>${f}<br><br><b>+5 pontos!</b>`,`<div style="text-align:center"><button class="btn" onclick="cont()">CONTINUAR</button></div>`)}
+ else if(t=='S'){S.score[p]+=5;ui();tone(780,.4);log(`J${p+1} teve sorte: +5 e avança 2 casas.`);
+  await card(t,`<i style="font-size:16px">${st}</i><br><br>Um vento favorável e um bom caminho pela savana! Você ganha <b>5 pontos</b> e <b>avança 2 casas</b>.`,`<div style="text-align:center"><button class="btn" onclick="cont()">AVANÇAR</button></div>`);
+  if(await move(p,2))return}
+ else await quiz(p,t,st);
+ next()}
+function quiz(p,t,st){
+ const q=nq(),o=q[1].map((x,i)=>[x,i]).sort(()=>Math.random()-.5);
+ const intro={C:'Desafio sobre evolução humana.',A:'Você encontrou um artefato arqueológico! Mostre que sabe interpretá-lo.',M:'A humanidade segue em movimento. Responda sobre a expansão pelos continentes.',O:'Um obstáculo bloqueia o caminho! Acerte para passar; errar faz você perder a próxima jogada.'}[t];
+ const ops=o.map(([x,i])=>`<button class="opt" data-i="${i}" onclick="ans(${p},'${t}',${i},${q[2]},this)">${x}</button>`).join('');
+ window._q=q;return card(t,`<i style="font-size:15px">${st}</i><br>${intro}<br><br><b>${q[0]}</b>`,ops)}
+function ans(p,t,i,c,b){
+ document.querySelectorAll('.opt').forEach(x=>{x.disabled=true;if(+x.dataset.i==c)x.classList.add('ok')});
+ const ok=i==c;if(!ok)b.classList.add('no');let m;
+ if(ok){S.score[p]+=10;tone(784,.3);m='Acertou! +10 pontos.'}else{tone(150,.4,'sawtooth');m='Errou desta vez.';if(t=='O'){S.skip[p]=true;m+=' Perde a próxima jogada.'}}
+ if(ok&&t=='O')m+=' Obstáculo superado!';
+ log(`J${p+1} em ${NAME[t].toLowerCase()}: ${ok?'acertou (+10)':'errou'}.`);ui();
+ $('fb').innerHTML=`<div class="ex"><b>${m}</b><br>${window._q[3]}</div><div style="text-align:center"><button class="btn" onclick="cont()">CONTINUAR</button></div>`}
+function win(p){S.score[p]+=20;ui();log(`J${p+1} chegou ao destino (+20)!`);tone(523,.2);setTimeout(()=>tone(659,.2),200);setTimeout(()=>tone(784,.5),400);
+ setTimeout(()=>{const w=S.score[0]==S.score[1]?'':S.score[0]>S.score[1]?0:1;
+  $('wt').textContent=`Jogador ${p+1} chegou ao destino final: a humanidade se espalhou pelo planeta!`;
+  $('wsc').textContent=`Pontuação final — Jogador 1: ${S.score[0]}  |  Jogador 2: ${S.score[1]}`+(w===''?' (empate nos pontos)':`  (mais pontos: Jogador ${w+1})`);
+  document.querySelectorAll('.cf').forEach(e=>e.remove());
+  for(let i=0;i<120;i++){const d=document.createElement('div');d.className='cf';d.style.cssText=`left:${Math.random()*100}%;background:hsl(${Math.random()*60+20},80%,${50+Math.random()*20}%);animation-duration:${2+Math.random()*3}s;animation-delay:${Math.random()*2}s`;$('win').appendChild(d)}
+  show('win')},1200)}
+</script></body></html>
